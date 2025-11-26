@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+enum PermissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REVOKED
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+
+}
+enum Role {
+  PATIENT
+  DOCTOR
+  ADMIN
+}
+//The reason for creating a common user table is that 
+//1)We don't have to repeat common fields like createdAt or role in three different tables
+//2)f we want to add a new type of user later (like a "Pharmacist"), we just add a new Role to the enum and create a PharmacistProfile table.
+//3)it's much easier to manage permissions. We can write rules based on the role in the single User table.
+model User {
+  id           String        @id @default(uuid())      
+  role         Role         
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+ //one to one relation with patient and doctor profile
+  patientProfile PatientProfile? 
+  doctorProfile  DoctorProfile?  
+}
+
+enum gender {
+  Male
+  Female
+  Other
+}
+enum bloodgroup {
+  O_POSITIVE   @map("O+")
+  O_NEGATIVE   @map("O-")
+  A_POSITIVE   @map("A+")
+  A_NEGATIVE   @map("A-")
+  B_POSITIVE   @map("B+")
+  B_NEGATIVE   @map("B-")
+  AB_POSITIVE  @map("AB+")
+  AB_NEGATIVE  @map("AB-") 
+}
+model PatientProfile {
+  id            String          @id @default(uuid())
+  userId        String          @unique 
+  patientuuid   String        @unique 
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName      String
+  dateOfBirth   DateTime?       @map("date_of_birth") 
+  gender        gender?        
+  contactNumber String?         @map("contact_number")@unique
+  address       String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  profilePictureUrl String?   @map("profile_picture_url")
+  emergencyContacts Json?     @map("emergency_contacts")
+  BloodGroup bloodgroup    
+  isonBoarded Boolean @default(false)   
+  permissionRequests PermissionRequest[]
+
+  medicalRecords MedicalRecord[] 
+}
+
+model DoctorProfile {
+  id               String          @id @default(uuid())
+   userId        String          @unique 
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic Information
+  fullName          String
+  dateOfBirth       DateTime?       @map("date_of_birth")
+  gender            gender?
+  contactNumber     String?         @unique @map("contact_number")
+  email             String          @unique
+  password          String         @map("password_hash")
+  
+
+  licenseNumber     String          @unique @map("license_number")
+  specialization    String
+  qualification     String[]        
+  yearsOfExperience Int             @map("years_of_experience")
+  hospitalName      String?         @map("hospital_name")
+  hospitalAddress   String?         @map("hospital_address")
+  departmentName    String?         @map("department_name")
+  profilePictureUrl String?         @map("profile_picture_url")     
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  permissionRequests PermissionRequest[]
+  fileAccessRequests FileAccessRequest[]
+  
+  // // Relations
+  // permissionRequests PermissionRequest[] @relation("DoctorPermissions")
+  // appointments      Appointment[]
+  // prescriptions     Prescription[]
+}
+
+
+
+model MedicalRecord {
+  id          String    @id @default(uuid())
+  patientId   String    
+  patient     PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  title       String    
+  type        String 
+  uploadDate  DateTime  @default(now())
+  fileUrl     String    
+  description String?   
+  isHidden    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  fileAccessRequests FileAccessRequest[]
+}
+model PermissionRequest {
+  id        String           @id @default(uuid())
+  doctorId  String
+  patientId String
+  status    PermissionStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  doctor    DoctorProfile  @relation(fields: [doctorId], references: [id])
+  patient   PatientProfile @relation(fields: [patientId], references: [id])
+
+  // Ensure a doctor sends only one request per patient
+  @@unique([doctorId, patientId])
+}
+
+model FileAccessRequest {
+  id        String           @id @default(uuid())
+  doctorId  String
+  recordId  String
+  status    PermissionStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  doctor    DoctorProfile  @relation(fields: [doctorId], references: [id])
+  record    MedicalRecord  @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, recordId])
+}
+
+// model AccessLog {
+  
+// }
