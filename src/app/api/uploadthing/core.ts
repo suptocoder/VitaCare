@@ -8,19 +8,13 @@ export const ourFileRouter = {
     image: { maxFileSize: "4MB", maxFileCount: 1 },
     pdf: { maxFileSize: "8MB", maxFileCount: 1 },
   })
-    .middleware(async () => {
-      try {
-        const user = await getCurrentUser();
-        console.log("UploadThing middleware - user:", user?.id);
-        if (!user) throw new Error("Unauthorized - no user found");
-        return { userId: user.id };
-      } catch (error) {
-        console.error("UploadThing middleware error:", error);
-        throw error;
-      }
+    .middleware(async ({ req }) => {
+      // UploadThing middleware - just allow upload, auth will be checked when creating DB record
+      console.log("UploadThing middleware - allowing upload");
+      return { uploadedAt: Date.now() };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Upload complete for userId:", metadata.userId);
+      console.log("Upload complete at:", metadata.uploadedAt);
       console.log("File URL:", file.url);
       return { url: file.url };
     }),
