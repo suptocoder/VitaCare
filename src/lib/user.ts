@@ -13,14 +13,14 @@ export const getUser = cache(
     }
 
     const sessionKey = `session:${sessionToken}`;
-    const sessionData = await redis.get(sessionKey);
+    const sessionData = await redis.get<string>(sessionKey);
 
     if (!sessionData) {
       return null;
     }
 
     try {
-      const { userId } = JSON.parse(sessionData as string);
+      const { userId } = JSON.parse(sessionData);
 
       if (!userId) {
         return null;
