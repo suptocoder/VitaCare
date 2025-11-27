@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminStorage } from "@/lib/firebase-admin";
+import { adminStorage } from "@/lib/firebaseAdmin";
 import { getCurrentUser } from "@/lib/user";
 import { prisma } from "@/lib/prisma";
 

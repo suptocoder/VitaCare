@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/user";
 import { cookies } from "next/headers";
-import { adminStorage } from "@/lib/firebase-admin";
-
-const projectId = process.env.FIREBASE_PROJECT_ID;
+import { adminStorage } from "@/lib/firebaseAdmin";
 
 export async function POST(req: NextRequest) {
   try {

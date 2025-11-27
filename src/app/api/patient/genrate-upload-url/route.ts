@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import redis from "@/lib/redis";
 import { cookies } from "next/headers";
-import { adminStorage } from "@/lib/firebase-admin"; 
+import { adminStorage } from "@/lib/firebaseAdmin"; 
 // check token onboarding
 //get phone number from redis
 // initialize Firebase Admin
