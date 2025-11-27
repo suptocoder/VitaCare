@@ -41,14 +41,19 @@ function MedicalRecords() {
 
     setIsUploading(true);
     try {
+      console.log("Starting upload for file:", file.name);
+      
       // Upload using UploadThing
       const uploadResult = await startUpload([file]);
       
+      console.log("Upload result:", uploadResult);
+      
       if (!uploadResult || uploadResult.length === 0) {
-        throw new Error("Upload failed");
+        throw new Error("Upload failed - no result returned");
       }
 
       const url = uploadResult[0].url;
+      console.log("File uploaded successfully:", url);
 
       // Create database record
       const createRes = await fetch("/api/patient/medical-records/create", {
@@ -65,10 +70,14 @@ function MedicalRecords() {
       if (createRes.ok) {
         const newRecord = await createRes.json();
         setRecords(prev => [newRecord, ...prev]);
+        alert("File uploaded successfully!");
+      } else {
+        const errorData = await createRes.json();
+        throw new Error(errorData.error || "Failed to create record");
       }
     } catch (error: any) {
       console.error("Upload error:", error);
-      alert(error.message || "Upload failed");
+      alert(`Upload failed: ${error.message || "Unknown error"}`);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

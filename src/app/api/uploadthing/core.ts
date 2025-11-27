@@ -9,9 +9,15 @@ export const ourFileRouter = {
     pdf: { maxFileSize: "8MB", maxFileCount: 1 },
   })
     .middleware(async () => {
-      const user = await getCurrentUser();
-      if (!user) throw new Error("Unauthorized");
-      return { userId: user.id };
+      try {
+        const user = await getCurrentUser();
+        console.log("UploadThing middleware - user:", user?.id);
+        if (!user) throw new Error("Unauthorized - no user found");
+        return { userId: user.id };
+      } catch (error) {
+        console.error("UploadThing middleware error:", error);
+        throw error;
+      }
     })
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Upload complete for userId:", metadata.userId);
