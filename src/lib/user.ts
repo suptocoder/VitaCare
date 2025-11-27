@@ -9,18 +9,24 @@ export const getUser = cache(
   
 
     if (!sessionToken) {
+      console.log("No session token provided");
       return null;
     }
 
     const sessionKey = `session:${sessionToken}`;
+    console.log("Looking up session:", sessionKey);
+    
     const sessionData = await redis.get<string>(sessionKey);
+    console.log("Session data from Redis:", sessionData);
 
     if (!sessionData) {
+      console.log("No session data found in Redis");
       return null;
     }
 
     try {
       const { userId } = JSON.parse(sessionData);
+      console.log("Found userId:", userId);
 
       if (!userId) {
         return null;
