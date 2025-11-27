@@ -48,8 +48,7 @@ export async function POST(req: NextRequest) {
     await redis.set(
       sessionKey,
       JSON.stringify({ userId: doctorProfile.userId }), // Store the main User ID in the session
-      "EX",
-      sessionExpiry
+      { ex: sessionExpiry }
     );
 
    

@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
 
 
     const onboardingKey = `onboarding:${onboardingToken}`;
-    const phoneNumber = await redis.get(onboardingKey);
+    const phoneNumber = await redis.get<string>(onboardingKey);
 
     if (!phoneNumber) {
       return NextResponse.json(
@@ -137,8 +137,7 @@ export async function POST(req: NextRequest) {
     await redis.set(
       sessionKey,
       JSON.stringify({ userId: newUser.id }),
-      "EX",
-      sessionExpiry
+      { ex: sessionExpiry }
     );
 
   (await cookies()).set("session_token", sessionToken, {

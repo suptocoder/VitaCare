@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       const sessionKey = `session:${sessionToken}`;
       const sessionExpiry = 60 * 60 * 24 * 7; // 7 days
 
-      await redis.set(sessionKey, JSON.stringify({ userId: patientProfile.userId }), 'EX', sessionExpiry);
+      await redis.set(sessionKey, JSON.stringify({ userId: patientProfile.userId }), { ex: sessionExpiry });
 
       (await cookies()).set("session_token", sessionToken, {
         httpOnly: true,
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
       // Store the verified phone number with this token for 10 minutes
       // This is like a flag so that we can verify that if person trying to onboard is valid or not
-      await redis.set(onboardingKey, phoneNumber, "EX", 600);
+      await redis.set(onboardingKey, phoneNumber, { ex: 600 });
 
       return NextResponse.json({
         success: true,
