@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     // Send notification to patient
     sendNotificationtoUser(record.patient.userId, {
-      type: "FILE_ACCESS_REQUESTED",
+      type: "ACCESS_REQUESTED",
       message: `Dr. ${doctor.fullName} has requested access to "${record.title}"`,
       data: {
         requestId: fileAccess.id,

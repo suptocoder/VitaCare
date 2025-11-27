@@ -110,7 +110,7 @@ export default async function PatientCardPage() {
                 Blood Group
               </span>
               <span className="font-semibold text-foreground">
-                {bloodGroupDisplay[patient.BloodGroup]}
+                {'BloodGroup' in patient ? bloodGroupDisplay[patient.BloodGroup as keyof typeof bloodGroupDisplay] : 'N/A'}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -119,7 +119,7 @@ export default async function PatientCardPage() {
               </span>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-foreground p-1 bg-muted rounded-md text-xs">
-                  {patient.patientuuid}
+                  {'patientuuid' in patient ? patient.patientuuid : patient.id}
                 </span>
               </div>
             </div>
