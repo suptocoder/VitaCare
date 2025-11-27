@@ -1,31 +1,9 @@
-
 import { NextRequest, NextResponse } from "next/server";
-import { getStorage } from "firebase-admin/storage";
-import admin from "firebase-admin";
 import { getCurrentUser } from "@/lib/user";
 import { cookies } from "next/headers";
+import { adminStorage } from "@/lib/firebase-admin";
+
 const projectId = process.env.FIREBASE_PROJECT_ID;
-const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-
-function initializeFirebase() {
-  if (admin.apps.length > 0) {
-    return admin.app();
-  }
-
-  const serviceAccount = {
-    projectId: projectId,
-    clientEmail: clientEmail,
-    privateKey: privateKey?.replace(/\\n/g, '\n'),
-  };
-  
-  return admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: `${projectId}.appspot.com`,
-  });
-}
-
-initializeFirebase();
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,9 +33,7 @@ export async function POST(req: NextRequest) {
     }
 
     console.log("Getting Firebase storage bucket...");
-    const bucketName = `${projectId}.appspot.com`;
-    console.log("Using bucket name:", bucketName);
-    const bucket = getStorage().bucket(bucketName);
+    const bucket = adminStorage.bucket();
     console.log("Bucket retrieved:", bucket.name);
     
     const filePath = `medical-records/${currentUser.id}/${Date.now()}-${fileName}`;

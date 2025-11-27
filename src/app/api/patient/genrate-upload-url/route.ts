@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStorage } from "firebase-admin/storage";
-import admin from "firebase-admin";
 import redis from "@/lib/redis";
 import { cookies } from "next/headers";
 import { adminStorage } from "@/lib/firebase-admin"; 
