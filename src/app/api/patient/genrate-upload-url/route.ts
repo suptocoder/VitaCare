@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const phoneNumber = await redis.get(onboardingKey);
+    const phoneNumber = await redis.get<string>(onboardingKey);
     if (!phoneNumber) {
       return NextResponse.json(
         { error: "Unauthorized: Invalid or expired token." },

@@ -17,7 +17,9 @@ export async function POST() {
 
     if (sessionToken) {
 
-      await redis.del(`session:${sessionToken}`);
+      await prisma.session.delete({
+        where: { token: sessionToken },
+      }).catch(() => {});
         
     
       response.cookies.delete("session_token");

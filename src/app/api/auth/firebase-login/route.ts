@@ -51,7 +51,13 @@ export async function POST(request: NextRequest) {
       const sessionKey = `session:${sessionToken}`;
       const sessionExpiry = 60 * 60 * 24 * 7; // 7 days
 
-      await redis.set(sessionKey, JSON.stringify({ userId: patientProfile.userId }), { ex: sessionExpiry });
+      await prisma.session.create({
+        data: {
+          token: sessionToken,
+          userId: patientProfile.userId,
+          expiresAt: new Date(Date.now() + sessionExpiry * 1000),
+        },
+      });
 
       (await cookies()).set("session_token", sessionToken, {
         httpOnly: true,

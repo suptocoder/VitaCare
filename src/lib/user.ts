@@ -1,6 +1,5 @@
 import { PatientProfile,DoctorProfile } from "@/generated/prisma";
 import { cache } from "react";
-import redis from "./redis";
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 
@@ -13,19 +12,21 @@ export const getUser = cache(
       return null;
     }
 
-    const sessionKey = `session:${sessionToken}`;
-    console.log("Looking up session:", sessionKey);
+    console.log("Looking up session:", sessionToken);
     
-    const sessionData = await redis.get<string>(sessionKey);
-    console.log("Session data from Redis:", sessionData);
+    const session = await prisma.session.findUnique({
+      where: { token: sessionToken },
+    });
+    
+    console.log("Session from database:", session);
 
-    if (!sessionData) {
-      console.log("No session data found in Redis");
+    if (!session || session.expiresAt < new Date()) {
+      console.log("No valid session found");
       return null;
     }
 
     try {
-      const { userId } = JSON.parse(sessionData);
+      const userId = session.userId;
       console.log("Found userId:", userId);
 
       if (!userId) {
