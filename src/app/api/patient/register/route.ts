@@ -84,18 +84,22 @@ export async function POST(req: NextRequest) {
     } = validation.data;
 
 
-    const onboardingKey = `onboarding:${onboardingToken}`;
-    const phoneNumber = await redis.get<string>(onboardingKey);
+    const onboardingData = await prisma.onboardingToken.findUnique({
+      where: { token: onboardingToken },
+    });
 
-    if (!phoneNumber) {
+    if (!onboardingData || onboardingData.expiresAt < new Date()) {
       return NextResponse.json(
         { error: "Unauthorized: Invalid or expired token." },
         { status: 401 }
       );
     }
 
+    const phoneNumber = onboardingData.phoneNumber;
 
-    await redis.del(onboardingKey);
+    await prisma.onboardingToken.delete({
+      where: { token: onboardingToken },
+    });
 
    
     const existingUser = await prisma.patientProfile.findUnique({

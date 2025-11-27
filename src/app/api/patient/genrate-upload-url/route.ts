@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import redis from "@/lib/redis";
 import { cookies } from "next/headers";
-import { adminStorage } from "@/lib/firebaseAdmin"; 
-// check token onboarding
-//get phone number from redis
-// initialize Firebase Admin
-//save out photo to bucket with unique identity
-//save url
-//return as response
-//on frontend we save with url
+import { adminStorage } from "@/lib/firebaseAdmin";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    // This endpoint must be protected. We'll use the onboarding token for authorization.
     const {token} = await req.json()
-    const onboardingKey = `onboarding:${token}`;
    
     if (!token) {
       return NextResponse.json(
@@ -23,13 +14,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const phoneNumber = await redis.get<string>(onboardingKey);
-    if (!phoneNumber) {
+    const onboardingData = await prisma.onboardingToken.findUnique({
+      where: { token },
+    });
+    
+    if (!onboardingData || onboardingData.expiresAt < new Date()) {
       return NextResponse.json(
         { error: "Unauthorized: Invalid or expired token." },
         { status: 401 }
       );
     }
+
+    const phoneNumber = onboardingData.phoneNumber;
 
     const { fileName, contentType } = await req.json();
 

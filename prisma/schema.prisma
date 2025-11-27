@@ -165,3 +165,13 @@ model Session {
   @@index([token])
   @@index([userId])
 }
+
+model OnboardingToken {
+  id          String   @id @default(uuid())
+  token       String   @unique
+  phoneNumber String
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  
+  @@index([token])
+}

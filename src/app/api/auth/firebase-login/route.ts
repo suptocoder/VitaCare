@@ -76,7 +76,13 @@ export async function POST(request: NextRequest) {
 
       // Store the verified phone number with this token for 10 minutes
       // This is like a flag so that we can verify that if person trying to onboard is valid or not
-      await redis.set(onboardingKey, phoneNumber, { ex: 600 });
+      await prisma.onboardingToken.create({
+        data: {
+          token: onboardingToken,
+          phoneNumber: phoneNumber,
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+        },
+      });
 
       return NextResponse.json({
         success: true,
